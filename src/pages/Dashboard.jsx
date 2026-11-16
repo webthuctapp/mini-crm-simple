@@ -1,17 +1,23 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { db } from '../lib/db.js'
-import { DEAL_STATUS, CUSTOMER_STATUS, money, fmtDate } from '../lib/format.js'
+import { DEAL_STATUS, CUSTOMER_STATUS, money, fmtDate, fmtDateTime, taskBucket } from '../lib/format.js'
 
 export default function Dashboard() {
   const [customers, setCustomers] = useState([])
   const [deals, setDeals] = useState([])
+  const [tasks, setTasks] = useState([])
   const [err, setErr] = useState('')
 
-  useEffect(() => {
-    Promise.all([db.list('customers'), db.list('deals')])
-      .then(([c, d]) => { setCustomers(c); setDeals(d) })
+  const load = () => {
+    Promise.all([db.list('customers'), db.list('deals'), db.list('tasks')])
+      .then(([c, d, t]) => { setCustomers(c); setDeals(d); setTasks(t) })
       .catch((e) => setErr(e.message))
-  }, [])
+  }
+  useEffect(() => { load() }, [])
+
+  const toggleTask = async (t) => { await db.update('tasks', t.id, { done: !t.done }); load() }
+  const custName = (id) => customers.find((c) => c.id === id)?.name
 
   const sum = (list) => list.reduce((s, d) => s + Number(d.amount || 0), 0)
   const won = deals.filter((d) => d.status === 'won')
@@ -20,6 +26,8 @@ export default function Dashboard() {
   const rate = closed.length ? Math.round((won.length / closed.length) * 100) : 0
   const maxD = Math.max(1, ...Object.keys(DEAL_STATUS).map((k) => deals.filter((d) => d.status === k).length))
   const maxC = Math.max(1, ...Object.keys(CUSTOMER_STATUS).map((k) => customers.filter((c) => c.status === k).length))
+  const urgent = tasks.filter((t) => ['overdue', 'today'].includes(taskBucket(t)))
+    .sort((a, b) => (a.due_at || '').localeCompare(b.due_at || ''))
 
   return (
     <>
@@ -32,6 +40,30 @@ export default function Dashboard() {
         <div className="card stat"><span>Đang chờ chốt</span><b>{money(sum(open))}</b></div>
         <div className="card stat"><span>Tỉ lệ chốt</span><b>{rate}%</b></div>
       </div>
+
+      <div className="card">
+        <div className="row-head" style={{ marginBottom: 8 }}>
+          <h3 style={{ margin: 0 }}>📅 Nhắc việc cần chú ý ({urgent.length})</h3>
+          <Link to="/tasks" style={{ marginLeft: 'auto' }}>Xem tất cả →</Link>
+        </div>
+        {urgent.slice(0, 5).map((t) => {
+          const b = taskBucket(t)
+          return (
+            <div className="row task-row" key={t.id}>
+              <label className="check">
+                <input type="checkbox" checked={t.done} onChange={() => toggleTask(t)} />
+                <span>{b === 'overdue' ? '🔴 ' : '🟡 '}{t.title}</span>
+              </label>
+              <div className="task-meta">
+                {custName(t.customer_id) && <Link to={`/customers/${t.customer_id}`}>{custName(t.customer_id)}</Link>}
+                <small>{fmtDateTime(t.due_at)}</small>
+              </div>
+            </div>
+          )
+        })}
+        {!urgent.length && <p className="empty">Không có việc quá hạn hay hôm nay 🎉</p>}
+      </div>
+
       <div className="two">
         <div className="card">
           <h3>Giao dịch theo trạng thái</h3>
@@ -51,7 +83,7 @@ export default function Dashboard() {
       <div className="two">
         <div className="card">
           <h3>Khách hàng mới nhất</h3>
-          {customers.slice(0, 5).map((c) => <div className="row" key={c.id}><span>{c.name}{c.company ? ` — ${c.company}` : ''}</span><small>{fmtDate(c.created_at)}</small></div>)}
+          {customers.slice(0, 5).map((c) => <div className="row" key={c.id}><Link className="name-link" to={`/customers/${c.id}`}>{c.name}{c.company ? ` — ${c.company}` : ''}</Link><small>{fmtDate(c.created_at)}</small></div>)}
           {!customers.length && <p className="empty">Chưa có dữ liệu</p>}
         </div>
         <div className="card">

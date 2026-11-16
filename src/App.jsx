@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes, Navigate } from 'react-router-dom'
 import Dashboard from './pages/Dashboard.jsx'
 import Customers from './pages/Customers.jsx'
+import CustomerDetail from './pages/CustomerDetail.jsx'
 import Deals from './pages/Deals.jsx'
+import Tasks from './pages/Tasks.jsx'
 import Login from './pages/Login.jsx'
 import { supabase, useSupabase } from './lib/db.js'
 
@@ -28,6 +30,7 @@ export default function App() {
           <NavLink to="/dashboard">📊 Tổng quan</NavLink>
           <NavLink to="/customers">👥 Khách hàng</NavLink>
           <NavLink to="/deals">💼 Giao dịch</NavLink>
+          <NavLink to="/tasks">📅 Nhắc việc</NavLink>
         </nav>
         {useSupabase ? (
           <div className="user">
@@ -43,7 +46,9 @@ export default function App() {
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/customers" element={<Customers />} />
+          <Route path="/customers/:id" element={<CustomerDetail />} />
           <Route path="/deals" element={<Deals />} />
+          <Route path="/tasks" element={<Tasks />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </main>

@@ -19,7 +19,11 @@ const local = {
   async update(t, id, patch) { write(t, read(t).map((r) => (r.id === id ? { ...r, ...patch } : r))) },
   async remove(t, id) {
     write(t, read(t).filter((r) => r.id !== id))
-    if (t === 'customers') write('orders', read('orders').map((o) => (o.customer_id === id ? { ...o, customer_id: null } : o)))
+    if (t === 'customers') {
+      write('deals', read('deals').filter((d) => d.customer_id !== id))
+      write('activities', read('activities').filter((a) => a.customer_id !== id))
+      write('tasks', read('tasks').map((x) => (x.customer_id === id ? { ...x, customer_id: null } : x)))
+    }
   },
 }
 
