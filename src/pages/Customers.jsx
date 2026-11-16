@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { db } from '../lib/db.js'
 import { CUSTOMER_STATUS } from '../lib/format.js'
 
@@ -65,10 +66,10 @@ export default function Customers() {
           <tbody>
             {shown.map((c) => (
               <tr key={c.id}>
-                <td><b>{c.name}</b></td><td>{c.company}</td><td>{c.phone}</td><td>{c.email}</td>
+                <td><Link className="name-link" to={`/customers/${c.id}`}><b>{c.name}</b></Link></td><td>{c.company}</td><td>{c.phone}</td><td>{c.email}</td>
                 <td><span className={'badge ' + c.status}>{CUSTOMER_STATUS[c.status]}</span></td>
                 <td>{c.note}</td>
-                <td className="actions"><button onClick={() => edit(c)}>Sửa</button><button className="danger" onClick={() => del(c.id)}>Xoá</button></td>
+                <td className="actions"><Link className="btn-link" to={`/customers/${c.id}`}>Chi tiết</Link><button onClick={() => edit(c)}>Sửa</button><button className="danger" onClick={() => del(c.id)}>Xoá</button></td>
               </tr>
             ))}
             {!shown.length && <tr><td colSpan="7" className="empty">Chưa có khách hàng</td></tr>}
