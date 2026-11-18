@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../lib/db.js'
-import { CUSTOMER_STATUS } from '../lib/format.js'
+import { CUSTOMER_STATUS, avatarStyle, initials } from '../lib/format.js'
 
 const empty = { name: '', company: '', phone: '', email: '', status: 'lead', note: '' }
 
@@ -66,7 +66,13 @@ export default function Customers() {
           <tbody>
             {shown.map((c) => (
               <tr key={c.id}>
-                <td><Link className="name-link" to={`/customers/${c.id}`}><b>{c.name}</b></Link></td><td>{c.company}</td><td>{c.phone}</td><td>{c.email}</td>
+                <td>
+                  <Link className="cust-cell" to={`/customers/${c.id}`}>
+                    <span className="avatar" style={avatarStyle(c.name)}>{initials(c.name)}</span>
+                    <b>{c.name}</b>
+                  </Link>
+                </td>
+                <td>{c.company}</td><td>{c.phone}</td><td>{c.email}</td>
                 <td><span className={'badge ' + c.status}>{CUSTOMER_STATUS[c.status]}</span></td>
                 <td>{c.note}</td>
                 <td className="actions"><Link className="btn-link" to={`/customers/${c.id}`}>Chi tiết</Link><button onClick={() => edit(c)}>Sửa</button><button className="danger" onClick={() => del(c.id)}>Xoá</button></td>

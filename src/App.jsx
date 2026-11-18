@@ -25,7 +25,13 @@ export default function App() {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <h1>📇 Mini CRM</h1>
+        <div className="brand">
+          <span className="brand-icon">📇</span>
+          <div>
+            <h1>Mini CRM</h1>
+            <small>Quản lý khách hàng</small>
+          </div>
+        </div>
         <nav>
           <NavLink to="/dashboard">📊 Tổng quan</NavLink>
           <NavLink to="/customers">👥 Khách hàng</NavLink>
@@ -38,10 +44,14 @@ export default function App() {
             <button onClick={() => supabase.auth.signOut()}>Đăng xuất</button>
           </div>
         ) : (
-          <small className="mode">🟡 Chế độ demo (dữ liệu lưu trên trình duyệt)</small>
+          <small className="mode">🟡 Chế độ demo (localStorage)</small>
         )}
       </aside>
       <main className="content">
+        <div className="topbar">
+          <span className="today">📅 Hôm nay, {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+          <span className="pill">{useSupabase ? '🟢 Đã kết nối Supabase' : '🟡 Demo Offline'}</span>
+        </div>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/dashboard" element={<Dashboard />} />

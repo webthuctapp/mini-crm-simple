@@ -16,3 +16,14 @@ export function taskBucket(t) {
   if (d <= endOfToday) return 'today'
   return 'upcoming'
 }
+
+const AVATAR_COLORS = ['#2563eb', '#7c3aed', '#059669', '#d97706', '#db2777', '#0891b2']
+export function avatarStyle(name = '') {
+  const code = [...name].reduce((s, c) => s + c.charCodeAt(0), 0)
+  return { background: AVATAR_COLORS[code % AVATAR_COLORS.length] }
+}
+export function initials(name = '') {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (!parts.length) return '?'
+  return (parts.length === 1 ? parts[0][0] : parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}

@@ -34,11 +34,26 @@ export default function Dashboard() {
       <h2>Tổng quan</h2>
       {err && <p className="error">{err}</p>}
       <div className="stats">
-        <div className="card stat"><span>Khách hàng</span><b>{customers.length}</b></div>
-        <div className="card stat"><span>Giao dịch</span><b>{deals.length}</b></div>
-        <div className="card stat"><span>Doanh thu (thành công)</span><b>{money(sum(won))}</b></div>
-        <div className="card stat"><span>Đang chờ chốt</span><b>{money(sum(open))}</b></div>
-        <div className="card stat"><span>Tỉ lệ chốt</span><b>{rate}%</b></div>
+        <div className="card stat blue">
+          <div className="stat-top"><span>Khách hàng</span><span className="stat-ico">👥</span></div>
+          <b>{customers.length}</b>
+        </div>
+        <div className="card stat purple">
+          <div className="stat-top"><span>Giao dịch</span><span className="stat-ico">💼</span></div>
+          <b>{deals.length}</b>
+        </div>
+        <div className="card stat green">
+          <div className="stat-top"><span>Doanh thu (thành công)</span><span className="stat-ico">💰</span></div>
+          <b>{money(sum(won))}</b>
+        </div>
+        <div className="card stat amber">
+          <div className="stat-top"><span>Đang chờ chốt</span><span className="stat-ico">⏳</span></div>
+          <b>{money(sum(open))}</b>
+        </div>
+        <div className="card stat cyan">
+          <div className="stat-top"><span>Tỉ lệ chốt</span><span className="stat-ico">🎯</span></div>
+          <b>{rate}%</b>
+        </div>
       </div>
 
       <div className="card">

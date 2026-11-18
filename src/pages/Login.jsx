@@ -16,16 +16,22 @@ export default function Login() {
   }
 
   return (
-    <div className="center">
+    <div className="login-bg">
       <form className="card login" onSubmit={submit}>
-        <h1>📇 Mini CRM</h1>
-        <p>Đăng nhập dành cho nhân viên</p>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <div className="brand-badge">📇</div>
+        <h1>Mini CRM</h1>
+        <p>Hệ thống quản lý khách hàng &amp; bán hàng</p>
+        <label className="field">
+          <span>Email nhân viên</span>
+          <input type="email" placeholder="name@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </label>
+        <label className="field">
+          <span>Mật khẩu</span>
+          <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        </label>
         {err && <p className="error">{err}</p>}
-        <button className="primary" disabled={busy}>{busy ? 'Đang đăng nhập...' : 'Đăng nhập'}</button>
+        <button className="primary full" disabled={busy}>{busy ? 'Đang đăng nhập...' : 'Đăng nhập'}</button>
       </form>
     </div>
   )
 }
-
