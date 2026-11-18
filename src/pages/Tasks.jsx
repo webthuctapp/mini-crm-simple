@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../lib/db.js'
-import { fmtDateTime, taskBucket } from '../lib/format.js'
+import PageHero from '../components/PageHero.jsx'
+import { fmtDateTime, taskBucket, avatarStyle, initials } from '../lib/format.js'
 
 const GROUPS = [
-  { key: 'overdue', label: '🔴 Quá hạn' },
-  { key: 'today', label: '🟡 Hôm nay' },
-  { key: 'upcoming', label: '🔵 Sắp tới' },
-  { key: 'done', label: '✅ Đã xong' },
+  { key: 'overdue', label: '🔴 Quá hạn', hint: 'Cần xử lý ngay' },
+  { key: 'today', label: '🟡 Hôm nay', hint: 'Hoàn thành trong ngày' },
+  { key: 'upcoming', label: '🔵 Sắp tới', hint: 'Việc những ngày tới' },
+  { key: 'done', label: '✅ Đã xong', hint: 'Đã hoàn thành' },
 ]
 
 export default function Tasks() {
@@ -45,34 +46,42 @@ export default function Tasks() {
   const toggle = async (t) => { await db.update('tasks', t.id, { done: !t.done }); load() }
   const del = async (id) => { if (confirm('Xoá nhắc việc này?')) { await db.remove('tasks', id); load() } }
   const custOf = (id) => customers.find((c) => c.id === id)
+  const countOf = (k) => tasks.filter((t) => taskBucket(t) === k).length
 
   return (
     <>
-      <div className="row-head">
-        <h2>Nhắc việc & Lịch hẹn</h2>
-        <label className="check" style={{ marginLeft: 'auto' }}>
-          <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone(e.target.checked)} />
-          <span>Ẩn việc đã xong</span>
-        </label>
-      </div>
+      <PageHero icon="📅" title="Nhắc việc & Lịch hẹn" subtitle="Không bỏ sót khách nào — việc quá hạn và hôm nay luôn được đưa lên đầu." color="rose">
+        <div className="hero-stat red"><small>Quá hạn</small><b>{countOf('overdue')}</b></div>
+        <div className="hero-stat amber"><small>Hôm nay</small><b>{countOf('today')}</b></div>
+        <div className="hero-stat"><small>Sắp tới</small><b>{countOf('upcoming')}</b></div>
+      </PageHero>
       {err && <p className="error">{err}</p>}
 
-      <form className="card form" onSubmit={add}>
-        <input
-          placeholder="Việc cần làm * (VD: Gọi lại anh Nam)"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-        />
-        <select value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value })}>
-          <option value="">-- Không gắn khách --</option>
-          {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-        <input
-          type="datetime-local"
-          value={form.due_at}
-          onChange={(e) => setForm({ ...form, due_at: e.target.value })}
-        />
-        <button className="primary">Thêm nhắc việc</button>
+      <form className="card section" onSubmit={add}>
+        <div className="section-head">
+          <h3>➕ Thêm nhắc việc</h3>
+          <label className="check">
+            <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone(e.target.checked)} />
+            <span>Ẩn việc đã xong</span>
+          </label>
+        </div>
+        <div className="form">
+          <input
+            placeholder="Việc cần làm * (VD: Gọi lại anh Nam)"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+          <select value={form.customer_id} onChange={(e) => setForm({ ...form, customer_id: e.target.value })}>
+            <option value="">-- Không gắn khách --</option>
+            {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <input
+            type="datetime-local"
+            value={form.due_at}
+            onChange={(e) => setForm({ ...form, due_at: e.target.value })}
+          />
+          <button className="primary">Thêm nhắc việc</button>
+        </div>
       </form>
 
       {GROUPS.filter((g) => !(hideDone && g.key === 'done')).map((g) => {
@@ -81,18 +90,26 @@ export default function Tasks() {
           .sort((a, b) => (a.due_at || '9999').localeCompare(b.due_at || '9999'))
         return (
           <div className={'card task-group ' + g.key} key={g.key}>
-            <h3>{g.label} <span>({list.length})</span></h3>
+            <div className="group-head">
+              <h3>{g.label} <span className="count-pill">{list.length}</span></h3>
+              <small>{g.hint}</small>
+            </div>
             {list.map((t) => {
               const c = custOf(t.customer_id)
               return (
-                <div className={'row task-row' + (t.done ? ' done' : '')} key={t.id}>
+                <div className={'task-line ' + g.key + (t.done ? ' done' : '')} key={t.id}>
                   <label className="check">
                     <input type="checkbox" checked={t.done} onChange={() => toggle(t)} />
                     <b>{t.title}</b>
                   </label>
                   <div className="task-meta">
-                    {c && <Link to={`/customers/${c.id}`}>{c.name}</Link>}
-                    <small>{fmtDateTime(t.due_at)}</small>
+                    {c && (
+                      <Link className="cust-cell" to={`/customers/${c.id}`}>
+                        <span className="avatar sm" style={avatarStyle(c.name)}>{initials(c.name)}</span>
+                        <span>{c.name}</span>
+                      </Link>
+                    )}
+                    <span className={'due-tag ' + g.key}>🕒 {fmtDateTime(t.due_at)}</span>
                     <button className="danger sm" onClick={() => del(t.id)}>Xoá</button>
                   </div>
                 </div>

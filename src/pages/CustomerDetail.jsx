@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { db } from '../lib/db.js'
-import { ACTIVITY_TYPE, CUSTOMER_STATUS, DEAL_STATUS, fmtDateTime, money } from '../lib/format.js'
+import { ACTIVITY_TYPE, CUSTOMER_STATUS, DEAL_STATUS, fmtDateTime, money, avatarStyle, initials, taskBucket } from '../lib/format.js'
+
+const ACT_ICON = { call: '📞', message: '💬', meeting: '🤝', note: '📝' }
 
 export default function CustomerDetail() {
   const { id } = useParams()
@@ -43,11 +45,7 @@ export default function CustomerDetail() {
       load()
     } catch (e) { setErr(e.message) }
   }
-
-  const delActivity = async (aid) => {
-    await db.remove('activities', aid)
-    load()
-  }
+  const delActivity = async (aid) => { await db.remove('activities', aid); load() }
 
   const addTask = async (e) => {
     e.preventDefault()
@@ -59,35 +57,43 @@ export default function CustomerDetail() {
       load()
     } catch (e) { setErr(e.message) }
   }
-
-  const toggleTask = async (t) => {
-    await db.update('tasks', t.id, { done: !t.done })
-    load()
-  }
+  const toggleTask = async (t) => { await db.update('tasks', t.id, { done: !t.done }); load() }
 
   if (loading) return <p>Đang tải...</p>
   if (!customer) return <><Link to="/customers">← Quay lại danh sách</Link><p className="empty">Không tìm thấy khách hàng.</p></>
 
+  const dealTotal = deals.reduce((s, d) => s + Number(d.amount || 0), 0)
+
   return (
     <>
-      <div className="row-head">
-        <Link className="btn-link" to="/customers">← Quay lại danh sách</Link>
-        <h2>{customer.name}</h2>
-        <span className={'badge ' + customer.status}>{CUSTOMER_STATUS[customer.status]}</span>
+      <Link className="back-link" to="/customers">← Quay lại danh sách</Link>
+
+      <div className="profile-hero">
+        <span className="avatar xl" style={avatarStyle(customer.name)}>{initials(customer.name)}</span>
+        <div className="profile-main">
+          <div className="profile-name">
+            <h2>{customer.name}</h2>
+            <span className={'badge ' + customer.status}>{CUSTOMER_STATUS[customer.status]}</span>
+          </div>
+          <p>{customer.company || 'Chưa có công ty'}</p>
+          <div className="profile-contact">
+            <span>📞 {customer.phone || '—'}</span>
+            <span>✉️ {customer.email || '—'}</span>
+          </div>
+        </div>
+        <div className="profile-stats">
+          <div><small>Giao dịch</small><b>{deals.length}</b></div>
+          <div><small>Tổng giá trị</small><b>{money(dealTotal)}</b></div>
+          <div><small>Lần chăm sóc</small><b>{activities.length}</b></div>
+        </div>
       </div>
       {err && <p className="error">{err}</p>}
-
-      <div className="card info-grid">
-        <div><small>Công ty</small><b>{customer.company || '—'}</b></div>
-        <div><small>Số điện thoại</small><b>{customer.phone || '—'}</b></div>
-        <div><small>Email</small><b>{customer.email || '—'}</b></div>
-        <div><small>Ghi chú</small><b>{customer.note || '—'}</b></div>
-      </div>
+      {customer.note && <div className="note-box">📌 <b>Ghi chú:</b> {customer.note}</div>}
 
       <div className="two">
-        <div className="card">
-          <h3>Lịch sử chăm sóc</h3>
-          <form className="form" onSubmit={addActivity} style={{ marginBottom: 14 }}>
+        <div className="card section">
+          <div className="section-head"><h3>🕒 Lịch sử chăm sóc <span className="count-pill">{activities.length}</span></h3></div>
+          <form className="form" onSubmit={addActivity} style={{ marginBottom: 16 }}>
             <select value={actForm.type} onChange={(e) => setActForm({ ...actForm, type: e.target.value })}>
               {Object.entries(ACTIVITY_TYPE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
@@ -101,13 +107,16 @@ export default function CustomerDetail() {
 
           <div className="timeline">
             {activities.map((a) => (
-              <div className="timeline-item" key={a.id}>
-                <div className="timeline-head">
-                  <span>{ACTIVITY_TYPE[a.type] || a.type}</span>
-                  <small>{fmtDateTime(a.created_at)}</small>
-                  <button className="danger sm" onClick={() => delActivity(a.id)}>Xoá</button>
+              <div className={'timeline-item ' + a.type} key={a.id}>
+                <div className="tl-dot">{ACT_ICON[a.type] || '📝'}</div>
+                <div className="tl-body">
+                  <div className="timeline-head">
+                    <b>{ACTIVITY_TYPE[a.type] || a.type}</b>
+                    <small>{fmtDateTime(a.created_at)}</small>
+                    <button className="danger sm" onClick={() => delActivity(a.id)}>Xoá</button>
+                  </div>
+                  <p>{a.content}</p>
                 </div>
-                <p>{a.content}</p>
               </div>
             ))}
             {!activities.length && <p className="empty">Chưa có lịch sử chăm sóc</p>}
@@ -115,8 +124,8 @@ export default function CustomerDetail() {
         </div>
 
         <div>
-          <div className="card">
-            <h3>Nhắc việc của khách này</h3>
+          <div className="card section">
+            <div className="section-head"><h3>📅 Nhắc việc <span className="count-pill">{tasks.length}</span></h3></div>
             <form className="form" onSubmit={addTask} style={{ marginBottom: 12 }}>
               <input
                 placeholder="Việc cần làm..."
@@ -130,24 +139,27 @@ export default function CustomerDetail() {
               />
               <button className="primary">Thêm</button>
             </form>
-            {tasks.map((t) => (
-              <div className={'row task-row' + (t.done ? ' done' : '')} key={t.id}>
-                <label className="check">
-                  <input type="checkbox" checked={t.done} onChange={() => toggleTask(t)} />
-                  <span>{t.title}</span>
-                </label>
-                <small>{fmtDateTime(t.due_at)}</small>
-              </div>
-            ))}
+            {tasks.map((t) => {
+              const b = taskBucket(t)
+              return (
+                <div className={'task-line ' + b + (t.done ? ' done' : '')} key={t.id}>
+                  <label className="check">
+                    <input type="checkbox" checked={t.done} onChange={() => toggleTask(t)} />
+                    <span>{t.title}</span>
+                  </label>
+                  <span className={'due-tag ' + b}>🕒 {fmtDateTime(t.due_at)}</span>
+                </div>
+              )
+            })}
             {!tasks.length && <p className="empty">Chưa có nhắc việc</p>}
           </div>
 
-          <div className="card">
-            <h3>Giao dịch ({deals.length})</h3>
+          <div className="card section">
+            <div className="section-head"><h3>💼 Giao dịch <span className="count-pill">{deals.length}</span></h3></div>
             {deals.map((d) => (
               <div className="row" key={d.id}>
-                <span>{d.title} <small>({DEAL_STATUS[d.status]})</small></span>
-                <b>{money(d.amount)}</b>
+                <span><b>{d.title}</b><small className="sub">{DEAL_STATUS[d.status]}</small></span>
+                <b className="amount">{money(d.amount)}</b>
               </div>
             ))}
             {!deals.length && <p className="empty">Chưa có giao dịch</p>}
