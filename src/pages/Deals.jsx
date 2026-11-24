@@ -61,11 +61,6 @@ export default function Deals() {
       {err && <p className="error">{err}</p>}
       {!customers.length && <p className="card empty">Hãy thêm khách hàng trước khi tạo giao dịch.</p>}
 
-      <div className="note-box info">
-        💡 <b>Khi nào tạo giao dịch (cơ hội)?</b> Khi khách <b>có nhu cầu thật</b>: hỏi giá, xin báo giá, hẹn demo… Chỉ liên hệ chưa có nhu cầu thì chưa cần tạo.
-        Cơ hội đi qua <b>Mới → Đang đàm phán → Thành công / Thất bại</b>. Khi <b>Thành công</b> hãy ghi nhận số tiền khách đã trả để biết công nợ.
-      </div>
-
       <form className="card section" onSubmit={add}>
         <div className="section-head"><h3>➕ Tạo cơ hội / giao dịch mới</h3></div>
         <div className="form">

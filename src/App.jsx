@@ -5,7 +5,6 @@ import Customers from './pages/Customers.jsx'
 import CustomerDetail from './pages/CustomerDetail.jsx'
 import Deals from './pages/Deals.jsx'
 import Tasks from './pages/Tasks.jsx'
-import Guide from './pages/Guide.jsx'
 import Login from './pages/Login.jsx'
 import { supabase, useSupabase } from './lib/db.js'
 
@@ -38,7 +37,6 @@ export default function App() {
           <NavLink to="/customers">👥 Khách hàng</NavLink>
           <NavLink to="/deals">💼 Giao dịch</NavLink>
           <NavLink to="/tasks">📅 Nhắc việc</NavLink>
-          <NavLink to="/guide">📖 Hướng dẫn</NavLink>
         </nav>
         {useSupabase ? (
           <div className="user">
@@ -61,7 +59,6 @@ export default function App() {
           <Route path="/customers/:id" element={<CustomerDetail />} />
           <Route path="/deals" element={<Deals />} />
           <Route path="/tasks" element={<Tasks />} />
-          <Route path="/guide" element={<Guide />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </main>
