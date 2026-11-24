@@ -20,7 +20,7 @@ export default function Login() {
       <form className="card login" onSubmit={submit}>
         <div className="brand-badge">📇</div>
         <h1>Mini CRM</h1>
-        <p>Hệ thống quản lý khách hàng &amp; bán hàng</p>
+        <p>Phần mềm nội bộ dành cho nhân viên &amp; quản lý bán hàng</p>
         <label className="field">
           <span>Email nhân viên</span>
           <input type="email" placeholder="name@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required />

@@ -14,7 +14,8 @@ create table if not exists deals (
   id uuid primary key default gen_random_uuid(),
   customer_id uuid references customers(id) on delete cascade,
   title text not null,
-  amount numeric not null default 0,
+  amount numeric not null default 0,    -- giá trị giao dịch (tổng tiền khách phải trả)
+  paid_amount numeric not null default 0, -- số tiền khách đã trả (công nợ = amount - paid_amount)
   status text not null default 'new',   -- new | negotiating | won | lost
   created_at timestamptz default now()
 );

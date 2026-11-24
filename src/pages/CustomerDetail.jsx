@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { db } from '../lib/db.js'
-import { ACTIVITY_TYPE, CUSTOMER_STATUS, DEAL_STATUS, fmtDateTime, money, avatarStyle, initials, taskBucket } from '../lib/format.js'
+import { ACTIVITY_TYPE, CUSTOMER_STATUS, DEAL_STATUS, PAY_STATUS, payStatus, fmtDateTime, money, avatarStyle, initials, taskBucket } from '../lib/format.js'
 
 const ACT_ICON = { call: '📞', message: '💬', meeting: '🤝', note: '📝' }
 
@@ -158,7 +158,7 @@ export default function CustomerDetail() {
             <div className="section-head"><h3>💼 Giao dịch <span className="count-pill">{deals.length}</span></h3></div>
             {deals.map((d) => (
               <div className="row" key={d.id}>
-                <span><b>{d.title}</b><small className="sub">{DEAL_STATUS[d.status]}</small></span>
+                <span><b>{d.title}</b><small className="sub">{DEAL_STATUS[d.status]}{d.status === 'won' ? ` · ${PAY_STATUS[payStatus(d)]}` : ''}</small></span>
                 <b className="amount">{money(d.amount)}</b>
               </div>
             ))}

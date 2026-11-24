@@ -5,6 +5,7 @@ import Customers from './pages/Customers.jsx'
 import CustomerDetail from './pages/CustomerDetail.jsx'
 import Deals from './pages/Deals.jsx'
 import Tasks from './pages/Tasks.jsx'
+import Guide from './pages/Guide.jsx'
 import Login from './pages/Login.jsx'
 import { supabase, useSupabase } from './lib/db.js'
 
@@ -37,6 +38,7 @@ export default function App() {
           <NavLink to="/customers">👥 Khách hàng</NavLink>
           <NavLink to="/deals">💼 Giao dịch</NavLink>
           <NavLink to="/tasks">📅 Nhắc việc</NavLink>
+          <NavLink to="/guide">📖 Hướng dẫn</NavLink>
         </nav>
         {useSupabase ? (
           <div className="user">
@@ -49,7 +51,7 @@ export default function App() {
       </aside>
       <main className="content">
         <div className="topbar">
-          <span className="today">📅 Hôm nay, {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+          <span className="topbar-date">📅 Hôm nay, {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
           <span className="pill">{useSupabase ? '🟢 Đã kết nối Supabase' : '🟡 Demo Offline'}</span>
         </div>
         <Routes>
@@ -59,6 +61,7 @@ export default function App() {
           <Route path="/customers/:id" element={<CustomerDetail />} />
           <Route path="/deals" element={<Deals />} />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/guide" element={<Guide />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </main>

@@ -6,6 +6,29 @@ export const DEAL_STATUS = { new: 'Mới', negotiating: 'Đang đàm phán', won
 export const CUSTOMER_STATUS = { lead: 'Tiềm năng', active: 'Đang hợp tác', inactive: 'Ngừng' }
 export const ACTIVITY_TYPE = { call: '📞 Gọi điện', message: '💬 Nhắn tin', meeting: '🤝 Gặp mặt', note: '📝 Ghi chú' }
 
+// Ý nghĩa từng giai đoạn của một cơ hội bán hàng
+export const DEAL_HINT = {
+  new: 'Khách vừa có nhu cầu / hỏi giá',
+  negotiating: 'Đã báo giá, đang thương lượng',
+  won: 'Khách đồng ý mua (đã chốt)',
+  lost: 'Khách từ chối / không mua nữa',
+}
+
+// Xác suất chốt ước tính theo giai đoạn (dùng để tính "Kỳ vọng chốt")
+export const STAGE_PROB = { new: 0.2, negotiating: 0.5 }
+
+// ----- Thanh toán / công nợ -----
+export const PAY_STATUS = { paid: 'Đã thanh toán', partial: 'Thanh toán một phần', unpaid: 'Chưa thanh toán' }
+export const paidOf = (d) => Math.min(Number(d.paid_amount || 0), Number(d.amount || 0))
+export const debtOf = (d) => Math.max(Number(d.amount || 0) - paidOf(d), 0)
+export function payStatus(d) {
+  const amt = Number(d.amount || 0)
+  const paid = paidOf(d)
+  if (amt > 0 && paid >= amt) return 'paid'
+  if (paid > 0) return 'partial'
+  return 'unpaid'
+}
+
 export function taskBucket(t) {
   if (t.done) return 'done'
   if (!t.due_at) return 'upcoming'
